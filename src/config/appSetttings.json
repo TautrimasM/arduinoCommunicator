@@ -1,0 +1,14 @@
+{
+  "arduino": {
+    "comPort": "COM1",
+    "baudRate": 9600,
+    "readInterval": 5
+  },
+  "db": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "postgres",
+    "user": "root",
+    "password": "password"
+  }
+}
