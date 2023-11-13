@@ -1,8 +1,14 @@
 {
+  "general": {
+    "init": false
+  },
   "arduino": {
-    "comPort": "COM1",
-    "baudRate": 9600,
+    "comPort": "COM4",
+    "baudRate": 115200,
     "readInterval": 5
+  },
+  "params": {
+    "deadband": 0.1
   },
   "db": {
     "host": "localhost",

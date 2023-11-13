@@ -31,7 +31,7 @@ export function parseWriteDataRequest(req: Request): OptionalSendData | null {
       "exchangerBoilerHysteresis"
     ),
     haltT: parseNumber(requestData.haltT, "haltT"),
-    auxHeatingDelayTimeMs: parseNumber(
+    auxHeatingDelayTimeMs: parseNotFloatNumber(
       requestData.auxHeatingDelayTimeMs,
       "auxHeatingDelayTimeMs"
     ),
@@ -53,5 +53,19 @@ function parseNumber(value: any, param: string): number | undefined | never {
     return value;
   } else {
     throw new Error(`Value of ${param} must be a number`);
+  }
+}
+
+function parseNotFloatNumber(
+  value: any,
+  param: string
+): number | undefined | never {
+  if (
+    typeof value === "undefined" ||
+    (typeof value === "number" && value % 1 == 0)
+  ) {
+    return value;
+  } else {
+    throw new Error(`Value of ${param} must be a non decimal number`);
   }
 }

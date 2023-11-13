@@ -37,6 +37,10 @@ function openPort() {
 }
 
 function startComm() {
+  if (port == undefined || port.closed) {
+    console.warn("Port Not opened");
+    openPort();
+  }
   port.write("0");
   job = schedule.scheduleJob(`*/${arduino.readInterval} * * * * *`, () => {
     port.write("0");

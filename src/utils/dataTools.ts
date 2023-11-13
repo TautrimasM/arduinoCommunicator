@@ -1,4 +1,8 @@
-export function areObjectsEqual(obj1: any, obj2: any): boolean {
+export function areObjectsEqual(
+  obj1: any,
+  obj2: any,
+  deadband?: number
+): boolean {
   const keys1 = Object.keys(obj1);
   const keys2 = Object.keys(obj2);
 
@@ -8,6 +12,15 @@ export function areObjectsEqual(obj1: any, obj2: any): boolean {
 
   for (const key of keys1) {
     if (obj1[key] !== obj2[key]) {
+      if (
+        typeof obj1[key] == "number" &&
+        typeof obj2[key] == "number" &&
+        deadband != undefined
+      ) {
+        if (Math.abs(obj1[key] - obj2[key]) < deadband) {
+          continue;
+        }
+      }
       return false;
     }
   }

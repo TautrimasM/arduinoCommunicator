@@ -9,14 +9,10 @@ export interface ReceivedData extends CommonData {
   boilerPumpOn: boolean;
   degassingValveOpen: boolean;
   auxHeatingOn: boolean;
-  degassingInProgress: boolean;
   sensorErrorForLongTime: boolean;
 }
 
-export interface SendData extends CommonData {
-  forceDegass: boolean;
-  forceSystemHalt: boolean;
-}
+export interface SendData extends CommonData {}
 
 export type OptionalSendData = Partial<SendData>;
 
@@ -27,4 +23,6 @@ interface CommonData {
   exchangerBoilerHysteresis: number;
   haltT: number;
   auxHeatingDelayTimeMs: number;
+  forceDegass: boolean;
+  forceSystemHalt: boolean;
 }

@@ -6,7 +6,6 @@ import {
 } from "../types/commDataTypes";
 import { EventEmitter } from "events";
 import { insertData } from "../db/dbHandler";
-import { areObjectsEqual } from "../utils/dataTools";
 
 let existingData: ReceivedData;
 const events = new EventEmitter();
@@ -45,7 +44,7 @@ export async function writeData(data: OptionalSendData): Promise<boolean> {
   };
 
   const parsedData = parseSendData(dataToWrite);
-
+  console.log(parsedData);
   try {
     commDriver.writeData(parsedData);
   } catch (e) {
@@ -67,13 +66,24 @@ export async function writeData(data: OptionalSendData): Promise<boolean> {
     throw new Error("Arduino Comm Timeout reached");
   }
 
-  if (existingData != undefined && dataToWrite != undefined) {
-    const areEqual = areObjectsEqual(dataToWrite, existingData);
-    if (areEqual) {
-      return true;
-    }
+  //type safe verbosity
+  if (
+    dataToWrite.collectorExchangerDelta !==
+      existingData.collectorExchangerDelta ||
+    dataToWrite.exchangerBoilerDelta !== existingData.exchangerBoilerDelta ||
+    dataToWrite.collectorExchangerHysteresis !==
+      existingData.collectorExchangerHysteresis ||
+    dataToWrite.exchangerBoilerHysteresis !==
+      existingData.exchangerBoilerHysteresis ||
+    dataToWrite.haltT !== existingData.haltT ||
+    dataToWrite.auxHeatingDelayTimeMs !== existingData.auxHeatingDelayTimeMs ||
+    dataToWrite.forceDegass !== existingData.forceDegass ||
+    dataToWrite.forceSystemHalt !== existingData.forceSystemHalt
+  ) {
+    return false;
   }
-  return false;
+
+  return true;
 }
 
 function parseReceivedData(input: string): ReceivedData {
@@ -95,8 +105,9 @@ function parseReceivedData(input: string): ReceivedData {
     boilerPumpOn: values[13] === "1",
     degassingValveOpen: values[14] === "1",
     auxHeatingOn: values[15] === "1",
-    degassingInProgress: values[16] === "1",
+    forceDegass: values[16] === "1",
     sensorErrorForLongTime: values[17] === "1",
+    forceSystemHalt: values[18] === "1",
   };
 
   return data;
