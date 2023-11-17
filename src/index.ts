@@ -8,13 +8,13 @@ const app = express();
 app.use(express.json());
 
 db.connect().then(() => {
-  //commDriver.startComm();
-  commDriver.startMockComm();
+  commDriver.startComm();
+  //commDriver.startMockComm();
   console.log("commStarted");
 
   app.get("/params", (req: Request, res: Response) => {
     const params = commDataHandler.getCurrentData();
-    return res.json(params);
+    return res.json({ ...params, comError: commDataHandler.getComState() });
   });
 
   app.get("/history", (req: Request, res: Response) => {

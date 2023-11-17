@@ -27,3 +27,11 @@ export function areObjectsEqual(
 
   return true;
 }
+
+export function hasDefinedNumberOfCommas(
+  str: string,
+  numberOfCommas: number
+): boolean {
+  const commaMatches = str.match(/,/g);
+  return commaMatches ? commaMatches.length === numberOfCommas : false;
+}

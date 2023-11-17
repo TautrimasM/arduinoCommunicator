@@ -8,7 +8,8 @@
     "readInterval": 5
   },
   "params": {
-    "deadband": 0.1
+    "count": 19,
+    "deadband": 0.2
   },
   "db": {
     "host": "localhost",

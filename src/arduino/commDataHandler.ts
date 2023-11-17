@@ -6,23 +6,35 @@ import {
 } from "../types/commDataTypes";
 import { EventEmitter } from "events";
 import { insertData } from "../db/dbHandler";
+import { params } from "../config/appSetttings.json";
+import { hasDefinedNumberOfCommas } from "../utils/dataTools";
 
 let existingData: ReceivedData;
 const events = new EventEmitter();
+let comError = false;
 
 commDriver.events.on("data", (line: string) => {
-  existingData = parseReceivedData(line);
-  insertData(existingData);
-  events.emit("dataParsed", existingData);
+  comError = false;
+  const newData = parseReceivedData(line);
+  if (newData != undefined) {
+    existingData = newData;
+    insertData(existingData);
+    events.emit("dataParsed", existingData);
+  } else {
+    console.log("received corrupt data");
+  }
 });
 
 commDriver.events.on("error", (err) => {
-  // Handle error event
+  comError = true;
   console.error("Received error:", err);
 });
 
 export function getCurrentData(): ReceivedData {
   return existingData;
+}
+export function getComState(): boolean {
+  return comError;
 }
 
 export async function writeData(data: OptionalSendData): Promise<boolean> {
@@ -86,7 +98,10 @@ export async function writeData(data: OptionalSendData): Promise<boolean> {
   return true;
 }
 
-function parseReceivedData(input: string): ReceivedData {
+function parseReceivedData(input: string): ReceivedData | undefined {
+  if (!hasDefinedNumberOfCommas(input, params.count - 1)) {
+    return undefined;
+  }
   const values = input.split(",").map((value) => value.trim());
   const data: ReceivedData = {
     systemUptime: +values[0],

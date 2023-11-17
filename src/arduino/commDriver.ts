@@ -49,7 +49,7 @@ function startComm() {
 
 function startMockComm() {
   const line =
-    "50000,45000,52.3,40.6,30.1,50000,8,5,9.5,6.0,5.5,7200000,1,1,1,0,0,0";
+    "50000,45000,52.3,40.6,30.1,0,8,5,9.5,6.0,5.5,7200000,1,1,1,0,0,0,0";
   events.emit("data", line);
   job = schedule.scheduleJob(`*/${arduino.readInterval} * * * * *`, () => {
     events.emit("data", line);
