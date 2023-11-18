@@ -21,13 +21,12 @@ commDriver.events.on("data", (line: string) => {
     insertData(existingData);
     events.emit("dataParsed", existingData);
   } else {
-    console.log("received corrupt data");
+    console.log("[ Comm Handler ] received corrupt data");
   }
 });
 
 commDriver.events.on("error", (err) => {
   comError = true;
-  console.error("Received error:", err);
 });
 
 export function getCurrentData(): ReceivedData {

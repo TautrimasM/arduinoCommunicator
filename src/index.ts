@@ -10,7 +10,6 @@ app.use(express.json());
 db.connect().then(() => {
   commDriver.startComm();
   //commDriver.startMockComm();
-  console.log("commStarted");
 
   app.get("/params", (req: Request, res: Response) => {
     const params = commDataHandler.getCurrentData();
@@ -51,5 +50,5 @@ db.connect().then(() => {
       res.send("Data write failed. " + e);
     }
   });
-  app.listen(4000, () => console.log("listening on port 4000"));
+  app.listen(4000, () => console.log("[ App ] listening on port 4000"));
 });

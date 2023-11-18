@@ -7,44 +7,57 @@ import { arduino } from "../config/appSetttings.json";
 let port: SerialPort;
 let parser: ReadlineParser;
 let job: Job;
+let dataTimestamp = new Date().getTime();
 const events = new EventEmitter();
 
 function openPort() {
   try {
-    console.log("Opening Port " + port);
+    console.log("[ Comm Driver ] opening serial port " + arduino.comPort);
     port = new SerialPort({
       path: arduino.comPort,
       baudRate: arduino.baudRate,
     });
     port.open;
     parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
-    console.log(`Serial port ${arduino.comPort} is open`);
 
     parser.on("data", (line: string) => {
+      console.log("data received: " + line);
+      dataTimestamp = new Date().getTime();
       events.emit("data", line);
     });
 
-    port.on("error", (err) => {
-      console.error("Error: ", err);
+    port.on("open", () => {
+      console.log(`[ Comm Driver ] serial port ${arduino.comPort} is open`);
+    });
+    port.on("close", (err: any) => {
+      console.log("[ Comm Driver ] device has disconnected");
       events.emit("error", err);
-      if (port.closed) {
-        open();
+      setTimeout(openPort, 5000);
+    });
+
+    port.on("error", (err) => {
+      console.error("[ Comm Driver ] error: ", err);
+      events.emit("error", err);
+      if (err.message.includes("File not found")) {
+        console.log("[ Comm Driver ] device is not connected");
+        setTimeout(openPort, 5000);
       }
     });
   } catch (e) {
-    console.error("Error: ", e);
+    console.error("error: ", e);
   }
 }
 
 function startComm() {
-  if (port == undefined || port.closed) {
-    console.warn("Port Not opened");
+  if (port == undefined || !port.isOpen) {
+    console.warn("[ Comm Driver ] serial port not open");
     openPort();
   }
-  port.write("0");
+  requestData();
   job = schedule.scheduleJob(`*/${arduino.readInterval} * * * * *`, () => {
-    port.write("0");
+    requestData();
   });
+  console.log("[ Comm Driver ] comm has started");
 }
 
 function startMockComm() {
@@ -55,10 +68,13 @@ function startMockComm() {
     events.emit("data", line);
   });
 }
-
+function requestData() {
+  console.log("[ Comm Driver ] requesting data");
+  port.write("0");
+}
 function writeData(data: string) {
-  if (port == undefined || port.closed) {
-    console.warn("Port Not opened");
+  if (port == undefined || !port.isOpen) {
+    console.warn("[ Comm Driver ] serial port is not open");
     openPort();
   }
   stopComm();
@@ -68,7 +84,7 @@ function writeData(data: string) {
 
 function stopComm() {
   if (job == undefined) {
-    console.warn("Comm not defined");
+    console.warn("[ Comm Driver ] comm not defined");
     return;
   }
   schedule.cancelJob(job);
@@ -76,15 +92,10 @@ function stopComm() {
 }
 
 function closePort() {
-  if (port == undefined) {
-    console.warn("Port Not Defined");
-    return;
+  if (port != undefined && port.isOpen) {
+    console.warn("[ Comm Driver ] closing serial port");
+    port.close();
   }
-  if (port.closed) {
-    console.warn("Port Not Open");
-    return;
-  }
-  port.close();
 }
 
 export {
